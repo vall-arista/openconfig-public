@@ -400,6 +400,58 @@ submodule openconfig-bgp-global {
     }
   }
 
+  grouping bgp-common-global-network-config {
+    description
+      "Configuration parameters for prefixes to import
+      into the BGP instance from the RIB";
+
+    leaf network {
+      type oc-inet:ip-prefix;
+      description
+        "Prefix to import into the BGP instance from the RIB.";
+    }
+
+    leaf import-policy {
+      type string;
+      description
+        "Name of the route map used to filter the networks to advertise";
+    }
+  }
+
+  grouping bgp-global-network-list {
+    description
+      "List of prefixes to import into the BGP instance from the RIB";
+
+    list network {
+      key "network";
+
+      description
+        "Configutation for the prefix to import into
+        the BGP instance from the RIB.";
+
+      leaf network {
+        type leafref {
+            path "../config/network";
+        }
+        description
+          "Reference to the prefix used as a key
+          for the network list";
+      }
+
+      container config {
+        description
+            "Configuration parameters for the prefix";
+        uses bgp-common-global-network-config;
+      }
+      container state {
+        config false;
+        description
+            "State information relating to the prefix";
+        uses bgp-common-global-network-config;
+      }
+    }
+  }
+
   // Structural groupings
   grouping bgp-global-base {
     description
@@ -479,6 +531,12 @@ submodule openconfig-bgp-global {
       description
         "Address family specific configuration";
       uses bgp-global-afi-safi-list;
+    }
+
+    container networks {
+      description
+        "Prefixes to import into BGP from the RIB";
+      uses bgp-global-network-list;
     }
 
     uses bgp-global-dynamic-neighbors;
